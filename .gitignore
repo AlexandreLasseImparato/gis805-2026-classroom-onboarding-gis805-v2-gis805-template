@@ -1,0 +1,33 @@
+# Data
+data/synthetic/
+data/staged/*
+!data/staged/.gitkeep
+data/exports/*
+!data/exports/.gitkeep
+
+# DuckDB
+db/*.duckdb
+db/*.wal
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Validation results (regenerated)
+validation/results/*
+!validation/results/.gitkeep
+
+# Instructor-only (never commit to student repos)
+tools/instructor/roster.csv
+tools/instructor/roster.json
+student-repos/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

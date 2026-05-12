@@ -1,5 +1,6 @@
 # Board Brief — S01
 
+Utilisation de CODEX dans VSCode
 ## Question du CEO
 Quelle categorie de produit déclinent, dans quelle region et pourquoi
 

@@ -25,6 +25,7 @@
 
 <!-- Ajoutez vos entrées ci-dessous -->
 2026-01-09 — Séance S02
+### 2026-05-11 — Séance S01
 
 nem des tables les 24 du jeux des données
 0 h 49
@@ -447,5 +448,828 @@ order_date >= DATE '2025-12-01'
 AND order_date < DATE '2026-01-01'
 C’est plus sûr que month = 12, car month = 12 peut mélanger plusieurs années.
 Donc oui : plus la requête SQL est complexe, plus il y a de risque d’erreur. C’est pour ça qu’on valide souvent les étapes avec des petits COUNT(*), des totaux simples, et des jointures vérifiées une par une.
+
+
+### 2026-05-18 — Séance S02
+combient de table de fait des sales?
+jeudi 20 h 06
+
+
+A travaillé pendant 17s
+Il y a 1 table de fait liée aux ventes.
+
+Elle s’appelle :
+
+raw_fact_sales
+
+
+
+
+jeudi 20 h 06
+combient des tables de fait Customer existe?
+jeudi 20 h 07
+
+
+A travaillé pendant 9s
+Il y a 0 table de fait Customer dans DuckDB.
+
+Autrement dit, aucune table ne contient à la fois fact et customer dans son nom. La table Customer existante est plutôt une dimension :
+
+raw_dim_customer
+
+
+
+
+jeudi 20 h 07
+combient des tables store existe dans la BD?
+jeudi 20 h 08
+
+
+A travaillé pendant 12s
+Il y a 2 tables liées à store dans la BD DuckDB :
+
+raw_dim_store
+raw_store_changes
+
+
+
+
+jeudi 20 h 08
+est-ce que il y a une table Dim Date deja construit?
+jeudi 20 h 11
+
+
+A travaillé pendant 9s
+Oui, il y a déjà une table Dim Date construite dans DuckDB.
+
+Elle s’appelle :
+
+raw_dim_date
+
+
+
+
+jeudi 20 h 11
+dans la table raw_dim_product quelle sont les colonnes?
+jeudi 20 h 14
+
+
+A travaillé pendant 8s
+Dans raw_dim_product, les colonnes sont :
+
+product_id      VARCHAR
+product_name    VARCHAR
+category        VARCHAR
+subcategory     VARCHAR
+brand           VARCHAR
+unit_cost       DOUBLE
+unit_price      DOUBLE
+
+
+
+
+jeudi 20 h 15
+donne la requete SQL pour Créer une table dim_product avec la nomenclature
+product_key, name, category, subcategory, brand
+
+basé sur la table raw_dim_product
+
+product_key=product_id
+name=product_name
+category=category
+subcategory=subcategory
+brand=brand
+
+
+CREATE OR REPLACE TABLE dim_customer AS
+SELECT
+    customer_id AS customer_key,
+    first_name || ' ' || last_name AS name,
+    loyalty_segment AS segment,
+    city,
+    province AS region
+FROM raw_dim_customer;
+
+executer la requete
+20 h 56
+
+
+A travaillé pendant 7s
+C’est exécuté. La table dim_customer a bien été créée dans DuckDB.
+
+Ses champs sont :
+
+customer_key  VARCHAR
+name          VARCHAR
+segment       VARCHAR
+city          VARCHAR
+region        VARCHAR
+
+
+
+
+20 h 56
+executer:
+select * from dim_customer
+limit 5
+20 h 57
+
+
+A travaillé pendant 7s
+Voici les 5 premières lignes de dim_customer :
+
+customer_key  name             segment  city        region
+CUS-00001     Olivier Simard   Gold     Gatineau    AB
+CUS-00002     Léa Ouellet      Gold     Sherbrooke  QC
+CUS-00003     Bob Pelletier    Silver   Gatineau    ON
+CUS-00004     Rose Dubois      New      Toronto     BC
+CUS-00005     Marc Gauthier    Silver   Québec      BC
+
+
+
+
+20 h 57
+liste des tables dans la BD
+20 h 58
+
+
+A travaillé pendant 5s
+Il y a maintenant 27 tables dans la BD :
+
+dim_customer
+dim_product
+fact_sales
+raw_bridge_campaign_allocation
+raw_bridge_customer_segment
+raw_customer_changes
+raw_customer_profile_bands
+raw_customer_scd3_history
+raw_dim_channel
+raw_dim_customer
+raw_dim_date
+raw_dim_geography
+raw_dim_product
+raw_dim_segment_outrigger
+raw_dim_store
+raw_fact_budget
+raw_fact_daily_inventory
+raw_fact_inventory_snapshot
+raw_fact_order_pipeline
+raw_fact_orders_transaction
+raw_fact_promo_exposure
+raw_fact_returns
+raw_fact_sales
+raw_fact_shipment
+raw_order_lines
+raw_orders
+raw_store_changes
+
+
+execute:
+
+CREATE OR REPLACE TABLE dim_date AS
+SELECT
+    CAST(date_key AS VARCHAR) AS date_key,
+    date_key AS date,
+    month,
+    quarter,
+    year
+FROM raw_dim_date;
+21 h 08
+
+
+A travaillé pendant 6s
+C’est exécuté. La table dim_date a bien été créée.
+
+Ses champs sont :
+
+date_key  VARCHAR
+date      DATE
+month     BIGINT
+quarter   BIGINT
+year      BIGINT
+
+
+
+
+21 h 09
+select * from dim_date limit 2
+21 h 09
+
+
+A travaillé pendant 6s
+Voici les 2 premières lignes de dim_date :
+
+date_key    date        month  quarter  year
+2024-01-01  2024-01-01  1      1        2024
+2024-01-02  2024-01-02  1      1        2024
+
+
+
+
+21 h 09
+select
+max(date)
+min (date)
+from dim_date
+21 h 10
+
+
+A travaillé pendant 6s
+Résultat :
+
+max_date    min_date
+2025-12-31  2024-01-01
+Donc dim_date couvre la période du 2024-01-01 au 2025-12-31.
+
+
+
+
+
+21 h 10
+select * from raw_dim_store limit 4
+21 h 12
+
+
+A travaillé pendant 6s
+Voici les 4 premières lignes de raw_dim_store :
+
+store_id  store_name               city       region     province  store_type
+STR-001   NexaMart Centre-Ville    Montréal   Québec     QC        flagship
+STR-002   NexaMart Rive-Sud        Longueuil  Québec     QC        standard
+STR-003   NexaMart Laval           Laval      Québec     QC        standard
+STR-004   NexaMart Gatineau        Gatineau   Outaouais  QC        standard
+
+
+
+
+21 h 12
+Voici les 4 premières lignes de raw_store_changes
+21 h 13
+
+
+A travaillé pendant 5s
+Voici les lignes disponibles de raw_store_changes :
+
+store_id  change_date  change_type      old_value  new_value
+STR-003   2025-12-01   region_reassign  Québec     Outaouais
+STR-007   2025-12-22   region_reassign  Ontario    Outaouais
+Il y a seulement 2 lignes dans cette table, donc LIMIT 4 retourne 2 résultats.
+
+
+
+
+
+21 h 13
+dim_store : store_key, name, city, région, province
+donner la requete SQL pour Créer une table dim_date avec la nomenclature des champs :
+store_key=store_id
+name=store_name
+city=city
+région=region
+province=province
+
+base sur la table raw_dim_store
+
+
+select * from dim_channel
+limit3
+21 h 28
+
+
+A travaillé pendant 5s
+Voici les 3 lignes de dim_channel :
+
+channel_id  channel_name    channel_type
+CH-WEB      E-Commerce Web  online
+CH-APP      Mobile App      online
+CH-STORE    In-Store        physical
+
+
+
+
+21 h 28
+select * from bridge_customer_segment limit5
+21 h 30
+
+
+A travaillé pendant 11s
+La table bridge_customer_segment n’existe pas encore. La table disponible est :
+
+raw_bridge_customer_segment
+Voici les 5 premières lignes :
+
+bridge_id  customer_id  segment   weight  effective_date  is_primary
+1          CUS-00001    Silver    1.0     2023-08-03      1
+2          CUS-00002    Silver    1.0     2024-01-10      1
+3          CUS-00003    Silver    1.0     2023-09-08      1
+4          CUS-00004    Platinum  0.415   2023-02-01      0
+5          CUS-00004    New       0.585   2023-02-01      1
+
+
+
+
+21 h 30
+il y a une fonction make check
+il y a un erreur:
+[SKIP]  ERROR            Binder Error: Referenced column "is_current" not found in FROM clause!
+
+descriver cet erreur
+21 h 32
+
+
+A travaillé pendant 30s
+Cette erreur veut dire que make check exécute une requête qui cherche une colonne appelée is_current, mais cette colonne n’existe pas dans ta table actuelle.
+
+Dans validation/checks.sql, le check concerné est celui-ci :
+
+WHERE is_current = TRUE
+Il sert à vérifier une dimension client en SCD Type 2 : une table dim_customer avec plusieurs versions d’un même client, et une colonne is_current pour indiquer la version active.
+
+Mais ta table dim_customer actuelle est une dimension simple Type 1. Elle contient seulement :
+
+customer_key
+name
+segment
+city
+region
+Donc DuckDB dit :
+
+Referenced column "is_current" not found in FROM clause
+En français : “je ne trouve pas la colonne is_current dans la table utilisée”.
+
+Ce n’est pas forcément grave : le rapport l’affiche en [SKIP], pas en [FAIL]. Ça veut dire que ce check est ignoré pour l’instant, probablement parce que tu n’as pas encore construit la version SCD2 de dim_customer.
+
+Par contre, je vois un autre point important : certains checks plus loin attendent aussi des colonnes comme customer_id, store_id, product_id, channel_key, order_number, sale_line_id, etc. Tes tables simplifiées utilisent plutôt customer_key, store_key, product_key, etc. Donc make check pourrait afficher d’autres [SKIP] ou [FAIL] tant que le modèle complet attendu par le cours n’est pas aligné.
+
+
+
+
+
+21 h 33
+dim_channel
+changer le nom de la colonne
+channel_id as channel_key
+21 h 40
+
+
+A travaillé pendant 14s
+C’est fait. Dans dim_channel, la colonne a été renommée :
+
+channel_id → channel_key
+Le schéma actuel est :
+
+channel_key   VARCHAR
+channel_name  VARCHAR
+channel_type  VARCHAR
+
+
+
+
+21 h 40
+dnas make check decrire l'erreur:
+[SKIP]  ERROR            Binder Error: Referenced column "channel_key" not found in FROM clause!
+21 h 41
+
+Cette erreur veut dire que make check exécute une requête qui cherche une colonne appelée channel_key, mais DuckDB ne la trouve pas dans la table utilisée.
+
+Le check concerné est probablement celui-ci dans fact_sales :
+
+SELECT 'FK_NOT_NULL' AS check_type,
+       'fact_sales.channel_key' AS detail,
+       CASE WHEN COUNT(*) FILTER (WHERE channel_key IS NULL) = 0 THEN 'PASS'
+            ELSE 'FAIL — NULL channel_key found' END AS result
+FROM fact_sales;
+Donc l’erreur ne parle pas de dim_channel. Elle parle de fact_sales.
+
+Ta table dim_channel a bien maintenant :
+
+channel_key
+channel_name
+channel_type
+Mais ta table fact_sales actuelle contient probablement :
+
+order_key
+product_key
+customer_key
+store_key
+date_key
+Elle n’a pas encore channel_key.
+
+Pour corriger, il faut recréer fact_sales en ajoutant :
+
+channel_id AS channel_key
+
+
+CREATE OR REPLACE TABLE fact_sales AS
+SELECT
+    order_number AS order_key,
+    product_id AS product_key,
+    customer_id AS customer_key,
+    store_id AS store_key,
+    order_date AS date_key
+FROM raw_fact_sales;
+22 h 05
+
+
+A travaillé pendant 7s
+C’est exécuté. fact_sales contient maintenant :
+
+order_key
+product_key
+customer_key
+store_key
+date_key
+Donc l’erreur product_key not found dans make check devrait être corrigée pour ce point précis.
+
+
+
+
+
+22 h 06
+[SKIP]  ERROR            Binder Error: Referenced column "is_current" not found in FROM clause!
+22 h 06
+
+Cette erreur vient du check SCD2 sur dim_customer.
+
+make check essaie d’exécuter une vérification qui utilise :
+
+WHERE is_current = TRUE
+Mais ta table dim_customer actuelle n’a pas de colonne is_current. Elle contient plutôt :
+
+customer_key
+name
+segment
+city
+region
+Donc DuckDB dit : je ne trouve pas la colonne is_current.
+
+Comme c’est affiché en [SKIP], ce n’est pas un échec bloquant. Ça veut dire que le check est ignoré pour l’instant. Ce check sert pour une version plus avancée de dim_customer, en SCD Type 2, où on ajoute des colonnes comme :
+
+effective_from
+effective_to
+is_current
+Pour ton modèle actuel simple, tu peux laisser ce [SKIP].
+
+
+
+
+
+22 h 06
+[SKIP]  ERROR            Binder Error: Referenced column "channel_key" not found in FROM clause!
+22 h 07
+
+Cette erreur veut dire que make check cherche la colonne channel_key dans fact_sales, mais ta table fact_sales ne l’a pas encore.
+
+Ta table actuelle contient :
+
+order_key
+product_key
+customer_key
+store_key
+date_key
+Le check attend aussi :
+
+channel_key
+Pour corriger, recrée fact_sales en ajoutant channel_id AS channel_key :
+
+CREATE OR REPLACE TABLE fact_sales AS
+SELECT
+    order_number AS order_key,
+    product_id AS product_key,
+    customer_id AS customer_key,
+    store_id AS store_key,
+    channel_id AS channel_key,
+    order_date AS date_key
+FROM raw_fact_sales;
+Après ça, le check fact_sales.channel_key devrait passer.
+
+
+
+
+
+22 h 07
+CREATE OR REPLACE TABLE fact_sales AS
+SELECT
+    order_number AS order_key,
+    product_id AS product_key,
+    customer_id AS customer_key,
+    store_id AS store_key,
+    channel_id AS channel_key,
+    order_date AS date_key
+FROM raw_fact_sales;
+22 h 09
+
+
+A travaillé pendant 13s
+C’est exécuté. fact_sales contient maintenant :
+
+order_key
+product_key
+customer_key
+store_key
+channel_key
+date_key
+Donc l’erreur channel_key not found devrait être corrigée.
+
+
+
+
+
+22 h 09
+[SKIP]  ERROR            'utf-8' codec can't decode byte 0x80 in position 227: invalid start byte
+22 h 10
+
+
+A travaillé pendant 13s
+Cette erreur [SKIP] ERROR 'utf-8' codec can't decode byte... vient très probablement du check GRAIN_UNIQUE dans validation/checks.sql.
+
+Ce check essaie de vérifier le grain de fact_sales avec des colonnes comme :
+
+order_number
+sale_line_id
+Mais ta table fact_sales actuelle contient :
+
+order_key
+product_key
+customer_key
+store_key
+channel_key
+date_key
+
+
+SELECT
+    p.category,
+    s.region,
+    d.quarter,
+    SUM(f.line_total) AS total_revenue,
+    COUNT(*) AS nb_lignes
+FROM fact_sales f
+JOIN dim_product p ON f.product_key = p.product_key
+JOIN dim_store   s ON f.store_key   = s.store_key
+JOIN dim_date    d ON f.date_key    = d.date_key
+WHERE p.category IN ('Electronics', 'Clothing') and quarter = 4
+GROUP BY p.category, s.region, d.quarter
+ORDER BY total_revenue DESC
+22 h 39
+
+
+A travaillé pendant 7s
+Voici le résultat pour Electronics et Clothing au trimestre 4 :
+
+category     region    quarter  total_revenue  nb_lignes
+Clothing     Québec    4        3362.16        31
+Clothing     Ontario   4        924.30         9
+Electronics  Québec    4        809.93         18
+Clothing     Outaouais 4        730.60         10
+Clothing     Estrie    4        567.10         6
+Clothing     Alberta   4        533.29         7
+Electronics  Alberta   4        323.08         9
+Electronics  Outaouais 4        289.58         9
+Electronics  Estrie    4        240.34         7
+Electronics  Ontario   4        237.89         5
+Clothing     BC        4        122.19         1
+Electronics  BC        4        40.76          1
+
+
+
+
+22 h 40
+crer la requete
+SELECT
+    p.category,
+    s.region,
+    d.quarter,
+    SUM(f.line_total)   AS total_revenue,
+    COUNT(*)             AS nb_lignes
+FROM fact_sales f
+JOIN dim_product  p ON f.product_id  = p.product_id
+JOIN dim_store    s ON f.store_id    = s.store_id
+JOIN dim_date     d ON f.order_date  = d.date_key
+GROUP BY p.category, s.region, d.quarter
+ORDER BY total_revenue DESC
+LIMIT 10;
+
+en utilisant raw_fact_sales
+22 h 41
+
+Voici la même requête, mais en utilisant directement raw_fact_sales :
+
+SELECT
+    p.category,
+    s.region,
+    d.quarter,
+    SUM(f.line_total) AS total_revenue,
+    COUNT(*) AS nb_lignes
+FROM raw_fact_sales f
+JOIN dim_product p ON f.product_id = p.product_key
+JOIN dim_store   s ON f.store_id = s.store_key
+JOIN dim_date    d ON f.order_date = d.date
+GROUP BY p.category, s.region, d.quarter
+ORDER BY total_revenue DESC
+LIMIT 10;
+Ici, raw_fact_sales utilise les champs source :
+
+product_id
+store_id
+order_date
+line_total
+et tes dimensions utilisent plutôt :
+
+product_key
+store_key
+date
+
+
+
+
+22 h 41
+SELECT
+    p.category,
+    s.region,
+    d.quarter,
+    SUM(f.line_total) AS total_revenue,
+    COUNT(*) AS nb_lignes
+FROM raw_fact_sales f
+JOIN dim_product p ON f.product_id = p.product_key
+JOIN dim_store   s ON f.store_id = s.store_key
+JOIN dim_date    d ON f.order_date = d.date
+GROUP BY p.category, s.region, d.quarter
+ORDER BY total_revenue DESC
+LIMIT 10;
+22 h 42
+
+
+A travaillé pendant 10s
+Voici le résultat avec raw_fact_sales :
+
+category          region  quarter  total_revenue  nb_lignes
+Pet Supplies      Québec  3        17463.45       44
+Pet Supplies      Québec  4        14412.87       38
+Pet Supplies      Québec  2        14330.36       33
+Toys & Games      Québec  1        13026.77       41
+Beauty & Health   Québec  1        12015.02       40
+Toys & Games      Québec  3        11653.13       40
+Books & Media     Québec  3        11597.80       31
+Pet Supplies      Québec  1        11508.89       33
+Books & Media     Québec  2        10544.54       36
+Automotive        Québec  4        10137.06       22
+
+
+
+
+22 h 42
+ajouter dans la requete
+WHERE p.category IN ('Electronics', 'Clothing') and Quarter = 4
+22 h 43
+
+Voici la requête avec le filtre ajouté :
+
+SELECT
+    p.category,
+    s.region,
+    d.quarter,
+    SUM(f.line_total) AS total_revenue,
+    COUNT(*) AS nb_lignes
+FROM raw_fact_sales f
+JOIN dim_product p ON f.product_id = p.product_key
+JOIN dim_store   s ON f.store_id = s.store_key
+JOIN dim_date    d ON f.order_date = d.date
+WHERE p.category IN ('Electronics', 'Clothing')
+  AND d.quarter = 4
+GROUP BY p.category, s.region, d.quarter
+ORDER BY total_revenue DESC
+LIMIT 10;
+
+
+
+
+22 h 43
+SELECT
+    p.category,
+    s.region,
+    d.quarter,
+    SUM(f.line_total) AS total_revenue,
+    COUNT(*) AS nb_lignes
+FROM raw_fact_sales f
+JOIN dim_product p ON f.product_id = p.product_key
+JOIN dim_store   s ON f.store_id = s.store_key
+JOIN dim_date    d ON f.order_date = d.date
+WHERE p.category IN ('Electronics', 'Clothing')
+  AND d.quarter = 4
+GROUP BY p.category, s.region, d.quarter
+ORDER BY total_revenue DESC
+LIMIT 10;
+
+
+Voici le résultat :
+
+category     region    quarter  total_revenue  nb_lignes
+Clothing     Québec    4        3362.16        31
+Clothing     Ontario   4        924.30         9
+Electronics  Québec    4        809.93         18
+Clothing     Outaouais 4        730.60         10
+Clothing     Estrie    4        567.10         6
+Clothing     Alberta   4        533.29         7
+Electronics  Alberta   4        323.08         9
+Electronics  Outaouais 4        289.58         9
+Electronics  Estrie    4        240.34         7
+Electronics  Ontario   4        237.89         5
+
+
+
+
+22 h 44
+SELECT
+    p.category,
+    s.region,
+    d.quarter,
+    SUM(f.line_total) AS total_revenue,
+    COUNT(*) AS nb_lignes
+FROM fact_sales f
+JOIN dim_product p ON f.product_key = p.product_key
+JOIN dim_store   s ON f.store_key   = s.store_key
+JOIN dim_date    d ON f.date_key    = d.date_key
+GROUP BY p.category, s.region, d.quarter
+ORDER BY total_revenue DESC
+LIMIT 10;
+22 h 45
+
+
+A travaillé pendant 7s
+Voici le résultat :
+
+category          region  quarter  total_revenue  nb_lignes
+Pet Supplies      Québec  3        17463.45       44
+Pet Supplies      Québec  4        14412.87       38
+Pet Supplies      Québec  2        14330.36       33
+Toys & Games      Québec  1        13026.77       41
+Beauty & Health   Québec  1        12015.02       40
+Toys & Games      Québec  3        11653.13       40
+Books & Media     Québec  3        11597.80       31
+Pet Supplies      Québec  1        11508.89       33
+Books & Media     Québec  2        10544.54       36
+Automotive        Québec  4        10137.06       22
+
+
+
+
+22 h 45
+Pet Supplies - Quebec quarte 3
+quelle sont les channels qui sont declinées du quarter 3 à 4.
+donne la requete pour regarder
+22 h 48
+
+Voici une requête pour voir les channels qui ont diminué de Q3 à Q4 pour Pet Supplies au Québec :
+
+SELECT
+    c.channel_name,
+    c.channel_type,
+    SUM(CASE WHEN d.quarter = 3 THEN f.line_total ELSE 0 END) AS revenue_q3,
+    SUM(CASE WHEN d.quarter = 4 THEN f.line_total ELSE 0 END) AS revenue_q4,
+    SUM(CASE WHEN d.quarter = 4 THEN f.line_total ELSE 0 END)
+      - SUM(CASE WHEN d.quarter = 3 THEN f.line_total ELSE 0 END) AS variation,
+    ROUND(
+        (
+            SUM(CASE WHEN d.quarter = 4 THEN f.line_total ELSE 0 END)
+            - SUM(CASE WHEN d.quarter = 3 THEN f.line_total ELSE 0 END)
+        )
+        / NULLIF(SUM(CASE WHEN d.quarter = 3 THEN f.line_total ELSE 0 END), 0)
+        * 100,
+        2
+    ) AS variation_pct
+FROM fact_sales f
+JOIN dim_product p ON f.product_key = p.product_key
+JOIN dim_store s ON f.store_key = s.store_key
+JOIN dim_date d ON f.date_key = d.date_key
+JOIN dim_channel c ON f.channel_key = c.channel_id
+WHERE p.category = 'Pet Supplies'
+  AND s.region = 'Québec'
+  AND d.quarter IN (3, 4)
+GROUP BY c.channel_name, c.channel_type
+HAVING
+    SUM(CASE WHEN d.quarter = 4 THEN f.line_total ELSE 0 END)
+    < SUM(CASE WHEN d.quarter = 3 THEN f.line_total ELSE 0 END)
+ORDER BY variation ASC;
+Cette requête affiche seulement les channels où le revenu de Q4 est plus bas que Q3.
+
+
+
+
+
+22 h 48
+executer la requete
+22 h 49
+
+
+
+A travaillé pendant 11s
+Résultat : les channels en déclin de Q3 à Q4 pour Pet Supplies au Québec sont :
+
+channel_name    channel_type  revenue_q3  revenue_q4  variation  variation_pct
+E-Commerce Web  online        3903.19     718.16      -3185.03   -81.60
+Mobile App      online        3777.30     2625.34     -1151.96   -30.50
+In-Store        physical      3917.70     2822.15     -1095.55   -27.96
+Le plus gros déclin est E-Commerce Web, avec une baisse d’environ 81,6 %.
 
 

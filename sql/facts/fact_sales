@@ -1,0 +1,8 @@
+CREATE OR REPLACE TABLE fact_sales AS
+SELECT
+    order_number AS order_key,
+    order_number AS product_key,
+    customer_id AS customer_key,
+    store_id AS store_key,
+    order_date AS date_key
+FROM raw_fact_sales;

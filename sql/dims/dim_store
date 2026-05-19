@@ -1,0 +1,8 @@
+CREATE OR REPLACE TABLE dim_store AS
+SELECT
+    store_id AS store_key,
+    store_name AS name,
+    city,
+    region,
+    province
+FROM raw_dim_store;

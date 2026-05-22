@@ -26,6 +26,96 @@
 <!-- Ajoutez vos entrées ci-dessous -->
 2026-01-09 — Séance S02
 ### 2026-05-11 — Séance S01
+Resume:
+Projet NexaMart – Analyse ventes (DuckDB + SQL)
+
+1. Structure des données
+
+~24 tables uniques (25 fichiers CSV listés, dont fact_sales apparaît 2 fois).
+Table principale ventes : fact_sales
+Dimensions utilisées :
+dim_product → catégorie produit
+dim_store → région
+dim_channel → canal de vente
+
+2. Modèle analytique
+Pour analyser les ventes par catégorie + région + channel :
+
+fact_sales = montants des ventes
+dim_product = catégorie produit
+dim_store = région
+dim_channel = type/canal (online, phone, physical)
+
+Jointure clé :
+fact_sales + dim_product + dim_store + dim_channel
+
+3. Cause du déclin des ventes
+Entre les derniers mois (Nov → Déc 2025, puis Sep → Déc 2025) :
+
+➡️ Le principal problème vient du canal ONLINE
+
+E-Commerce Web
+Mobile App
+Marketplace 3P
+
+➡️ Deuxième facteur : PHONE
+
+Telephone Orders
+
+➡️ PHYSICAL (In-Store) impacte moins, sauf certains cas (ex. Beauty & Health Québec).
+
+4. Exemples de déclins majeurs
+
+Pet Supplies – Québec → Mobile App ↓
+Beauty & Health – Ontario → E-Commerce Web ↓
+Automotive – Ontario/Estrie → Online ↓
+Toys & Games – Québec → Telephone Orders ↓
+
+Conclusion forte :
+
+Les catégories ne déclinent pas partout de la même façon : le déclin est surtout causé par certains channels qui s’effondrent dans certaines régions.
+
+5. SQL et période
+
+Même requête SQL pour toutes les analyses.
+On change seulement :
+la période (WHERE date),
+les mois comparés (CASE WHEN / pivot).
+Exemple : Nov→Déc ou Sep→Déc = même logique, paramètres différents.
+
+6. Validation des données
+Dans fact_sales :
+
+2 805 lignes
+881 commandes distinctes (order_number)
+Donc ≈ 3,18 lignes par commande → une commande contient plusieurs produits.
+
+7. Important sur les dimensions
+fact_sales contient seulement les IDs :
+
+product_id
+store_id
+channel_id
+
+Pour obtenir :
+
+nom produit,
+catégorie,
+région,
+channel,
+
+➡️ il faut obligatoirement joindre les dimensions (dim_product, dim_store, dim_channel).
+
+8. Risques SQL (important)
+Les requêtes complexes peuvent produire des erreurs :
+
+Mauvaise jointure → faux résultats
+Duplication → ventes gonflées
+Perte de lignes (INNER JOIN)
+Mauvais grain (commande vs ligne de commande)
+Filtre de date incorrect → mélange d’années/mois
+
+Text au complet pour ### 2026-05-11 — Séance S01
 
 nem des tables les 24 du jeux des données
 0 h 49
@@ -451,6 +541,165 @@ Donc oui : plus la requête SQL est complexe, plus il y a de risque d’erreur. 
 
 
 ### 2026-05-18 — Séance S02
+
+Resume pour Séance S02
+
+Projet NexaMart – Construction du Data Warehouse & Validation SQL
+
+1. Structure de la BD
+Identification des tables clés :
+
+1 table de faits ventes → raw_fact_sales
+0 fact customer → customer est une dimension (raw_dim_customer)
+Tables store :
+raw_dim_store
+raw_store_changes
+Table date déjà existante :
+raw_dim_date
+2. Construction des dimensions (modèle étoile)
+
+Création des dimensions simplifiées à partir des tables raw :
+
+dim_customer
+
+customer_key
+name
+segment
+city
+region
+
+dim_product
+
+product_key
+name
+category
+subcategory
+brand
+
+dim_date
+
+date_key
+date
+month
+quarter
+year
+
+dim_store
+
+store_key
+name
+city
+region
+province
+
+dim_channel
+
+renommage :
+channel_id → channel_key
+3. Construction de fact_sales
+
+Création progressive de la table de faits normalisée :
+
+Ajout des clés :
+
+order_key
+product_key
+customer_key
+store_key
+channel_key
+date_key
+
+basée sur raw_fact_sales.
+
+4. Problèmes make check (validation)
+
+Plusieurs erreurs analysées :
+
+Erreur is_current not found
+➡️ Cause :
+make check attend une dimension SCD Type 2 (dim_customer) avec :
+
+effective_from
+effective_to
+is_current
+
+Mais le modèle actuel est simple (Type 1).
+
+➡️ Conclusion :
+[SKIP] non bloquant.
+
+Erreur channel_key not found
+➡️ Cause :
+fact_sales ne contenait pas channel_key.
+
+➡️ Correction :
+Ajout :
+channel_id AS channel_key
+
+dans fact_sales.
+
+Erreur UTF-8 decode
+➡️ Cause probable :
+validation GRAIN_UNIQUE attendait des colonnes absentes (sale_line_id, order_number) dans le modèle simplifié.
+
+5. Analyse Business SQL
+
+Requête analytique créée avec jointures :
+
+fact_sales
+
+dim_product
+dim_store
+dim_date
+
+pour obtenir :
+
+ventes par
+
+catégorie
+région
+trimestre
+
+Mesures :
+
+SUM(line_total) → revenus
+COUNT(*) → nombre de lignes ventes
+6. Résultats clés
+
+Top ventes :
+➡️ Pet Supplies – Québec domine plusieurs trimestres.
+
+Exemple :
+
+Q3 Québec Pet Supplies
+≈ 17 463$
+Q4 Québec Pet Supplies
+≈ 14 413$
+
+→ baisse importante.
+
+7. Analyse du déclin (Q3 → Q4)
+
+Pour Pet Supplies – Québec, recherche des channels responsables du recul :
+
+Déclin principal :
+
+Channel	Baisse
+E-Commerce Web	−81.6%
+Mobile App	−30.5%
+In-Store	−28.0%
+
+➡️ Cause principale du déclin : Online, surtout E-Commerce Web.
+
+Conclusion ultra courte
+
+La séance a servi à construire un modèle étoile propre (dimensions + fact_sales), corriger les erreurs make check, puis faire une analyse business montrant que le déclin des ventes Pet Supplies au Québec entre Q3 et Q4 est principalement causé par la chute du canal E-Commerce Web.
+
+Test original pour la Scèance S02
+
+
+
+
 combient de table de fait des sales?
 jeudi 20 h 06
 
@@ -1273,3 +1522,12 @@ In-Store        physical      3917.70     2822.15     -1095.55   -27.96
 Le plus gros déclin est E-Commerce Web, avec une baisse d’environ 81,6 %.
 
 
+- Limites ou erreurs observées.
+
+Quand les requêtes sont très complexes, avec beaucoup de jointures, plusieurs tables et des tables ponts, les résultats peuvent être affectés. Ainsi, une même requête peut produire des résultats différents selon la personne qui la construit.
+
+Si on modifie légèrement la manière d’écrire le script, même pour obtenir un résultat similaire, l’IA peut interpréter la demande différemment et fournir un résultat différent. Donc, deux personnes ayant le même objectif analytique peuvent obtenir des résultats différents simplement parce que la formulation de la requête ou du besoin a changé, ce qui peut mener à une logique SQL différente.
+
+De plus, lorsqu’on travaille avec des requêtes complexes, la validation devient souvent nécessaire afin de comprendre comment le résultat a été obtenu. Cette validation peut devenir très exhaustive lorsqu’il y a de nombreux éléments impliqués. Dans mon cas, j’ai seulement effectué quelques validations liées au nombre de lignes, aux jointures ou aux totaux, mais dans un contexte réel, cette validation peut demander beaucoup plus de temps.
+
+Même lors de la lecture directe d’une table importée à partir d’un CSV, pourtant petite, il est arrivé qu’en demandant une valeur précise (ligne/colonne), la réponse soit erronée. Après vérification, l’IA a répondu : « Vous avez raison, voici la nouvelle valeur ». La fiabilité peut donc être variable et nécessite des tests avant toute utilisation pour une prise de décision réelle.

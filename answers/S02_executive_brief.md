@@ -104,3 +104,5 @@ Maintenent il y a une base des données qui peut repondre aux besoins d'informat
 Étoile:
 
 Visualisation du modèle étoile dans le fichier schema-va.png
+
+![alt text](image-1.png)

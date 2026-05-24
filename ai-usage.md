@@ -1531,3 +1531,616 @@ Si on modifie légèrement la manière d’écrire le script, même pour obtenir
 De plus, lorsqu’on travaille avec des requêtes complexes, la validation devient souvent nécessaire afin de comprendre comment le résultat a été obtenu. Cette validation peut devenir très exhaustive lorsqu’il y a de nombreux éléments impliqués. Dans mon cas, j’ai seulement effectué quelques validations liées au nombre de lignes, aux jointures ou aux totaux, mais dans un contexte réel, cette validation peut demander beaucoup plus de temps.
 
 Même lors de la lecture directe d’une table importée à partir d’un CSV, pourtant petite, il est arrivé qu’en demandant une valeur précise (ligne/colonne), la réponse soit erronée. Après vérification, l’IA a répondu : « Vous avez raison, voici la nouvelle valeur ». La fiabilité peut donc être variable et nécessite des tests avant toute utilisation pour une prise de décision réelle.
+
+
+SELECT *
+FROM dim_store;
+17 h 12
+
+
+A travaillé pendant 5s
+Résultat actuel de :
+
+SELECT *
+FROM dim_store;
+store_id	name	city	region	province
+STR-001	NexaMart Centre-Ville	Montréal	Québec	QC
+STR-002	NexaMart Rive-Sud	Longueuil	Québec	QC
+STR-003	NexaMart Laval	Laval	Québec	QC
+STR-004	NexaMart Gatineau	Gatineau	Outaouais	QC
+STR-005	NexaMart Sherbrooke	Sherbrooke	Estrie	QC
+STR-006	NexaMart Ottawa	Ottawa	Ontario	ON
+STR-007	NexaMart Toronto-Downtown	Toronto	Ontario	ON
+STR-008	NexaMart Mississauga	Mississauga	Ontario	ON
+STR-009	NexaMart Calgary	Calgary	Alberta	AB
+STR-010	NexaMart Vancouver	Vancouver	BC	BC
+STR-004 est revenu à Outaouais, et la colonne Is_Current n’est plus présente.
+
+
+### 2026-05-22 — Séance S03
+
+Recherche combient des Outaouais et max lignes de la table dim_store
+création du script type1
+Création du script tyoe2 par etapes
+validation de la règle de la clé
+test depuis le debut avec makegenerate et make load
+tester création de la table dim_store avec nouveaux champs
+validation de la table dim_store avant et après de rouler le script Type2
+
+
+Executer la requete select * from dim_store limit 10; apporter les resultats
+vendredi 16 h 23
+A travaillé pendant 10s
+Résultat de la requête :
+select * from dim_store limit 10;
+store_id	name	city	region	province
+STR-001	NexaMart Centre-Ville	Montréal	Québec	QC
+STR-002	NexaMart Rive-Sud	Longueuil	Québec	QC
+STR-003	NexaMart Laval	Laval	Québec	QC
+STR-004	NexaMart Gatineau	Gatineau	Outaouais	QC
+STR-005	NexaMart Sherbrooke	Sherbrooke	Estrie	QC
+STR-006	NexaMart Ottawa	Ottawa	Ontario	ON
+STR-007	NexaMart Toronto-Downtown	Toronto	Ontario	ON
+STR-008	NexaMart Mississauga	Mississauga	Ontario	ON
+STR-009	NexaMart Calgary	Calgary	Alberta	AB
+STR-010	NexaMart Vancouver	Vancouver	BC	BC
+vendredi 16 h 23
+pour savoir la quantité des lignes avec region = Outaouais select * from dim_store where region = Outaouais
+vendredi 16 h 24
+A travaillé pendant 9s
+La quantité de lignes avec region = 'Outaouais' est :
+1
+La requête correcte est :
+SELECT COUNT(*) AS nombre_lignes
+FROM dim_store
+WHERE region = 'Outaouais';
+
+je veux maintenant juste une requete pour faire ces deux étapes
+vendredi 16 h 29
+Voici une seule requête SQL avec les deux étapes :
+ALTER TABLE dim_store
+ADD COLUMN Is_Current VARCHAR;
+
+UPDATE dim_store
+SET Is_Current = 'True';
+Si tu veux inclure aussi la modification de STR-004, la requête complète devient :
+UPDATE dim_store
+SET region = 'Québec'
+WHERE store_id = 'STR-004';
+
+ALTER TABLE dim_store
+ADD COLUMN Is_Current VARCHAR;
+
+UPDATE dim_store
+SET Is_Current = 'True';
+vendredi 16 h 29
+select * from dim_store
+vendredi 16 h 29
+A travaillé pendant 10s
+Résultat de :
+SELECT *
+FROM dim_store;
+store_id	name	city	region	province	Is_Current
+STR-001	NexaMart Centre-Ville	Montréal	Québec	QC	True
+STR-002	NexaMart Rive-Sud	Longueuil	Québec	QC	True
+STR-003	NexaMart Laval	Laval	Québec	QC	True
+STR-004	NexaMart Gatineau	Gatineau	Québec	QC	True
+STR-005	NexaMart Sherbrooke	Sherbrooke	Estrie	QC	True
+STR-006	NexaMart Ottawa	Ottawa	Ontario	ON	True
+STR-007	NexaMart Toronto-Downtown	Toronto	Ontario	ON	True
+STR-008	NexaMart Mississauga	Mississauga	Ontario	ON	True
+STR-009	NexaMart Calgary	Calgary	Alberta	AB	True
+STR-010	NexaMart Vancouver	Vancouver	BC	BC	True
+vendredi 16 h 30
+SELECT * FROM dim_store;
+vendredi 16 h 49
+A travaillé pendant 13s
+Résultat de :
+SELECT *
+FROM dim_store;
+store_id	name	city	region	province	Is_Current
+STR-001	NexaMart Centre-Ville	Montréal	Québec	QC	True
+STR-002	NexaMart Rive-Sud	Longueuil	Québec	QC	True
+STR-003	NexaMart Laval	Laval	Québec	QC	True
+STR-004	NexaMart Gatineau	Gatineau	Québec	QC	True
+STR-005	NexaMart Sherbrooke	Sherbrooke	Estrie	QC	True
+STR-006	NexaMart Ottawa	Ottawa	Ontario	ON	True
+STR-007	NexaMart Toronto-Downtown	Toronto	Ontario	ON	True
+STR-008	NexaMart Mississauga	Mississauga	Ontario	ON	True
+STR-009	NexaMart Calgary	Calgary	Alberta	AB	True
+STR-010	NexaMart Vancouver	Vancouver	BC	BC	True
+vendredi 16 h 49
+SELECT * FROM dim_store;
+vendredi 16 h 52
+A travaillé pendant 13s
+Résultat actuel de dim_store :
+store_id	name	city	region	province	Is_Current
+STR-001	NexaMart Centre-Ville	Montréal	Québec	QC	True
+STR-002	NexaMart Rive-Sud	Longueuil	Québec	QC	True
+STR-003	NexaMart Laval	Laval	Québec	QC	True
+STR-004	NexaMart Gatineau	Gatineau	Québec	QC	True
+STR-005	NexaMart Sherbrooke	Sherbrooke	Estrie	QC	True
+STR-006	NexaMart Ottawa	Ottawa	Ontario	ON	True
+STR-007	NexaMart Toronto-Downtown	Toronto	Ontario	ON	True
+STR-008	NexaMart Mississauga	Mississauga	Ontario	ON	True
+STR-009	NexaMart Calgary	Calgary	Alberta	AB	True
+STR-010	NexaMart Vancouver	Vancouver	BC	BC	True
+vendredi 16 h 52
+voce criou em algum lugar alguma instrucao UPDATE?
+vendredi 17 h 02
+Sim. Eu executei dois UPDATE diretamente no banco db/nexamart.duckdb:
+select * from dim_store
+vendredi 17 h 31
+A travaillé pendant 12s
+Résultat actuel de :
+SELECT *
+FROM dim_store;
+store_id	name	city	region	province	effective	end
+STR-001	NexaMart Centre-Ville	Montréal	Québec	QC	2026-05-22	NULL
+STR-002	NexaMart Rive-Sud	Longueuil	Québec	QC	2026-05-22	NULL
+STR-003	NexaMart Laval	Laval	Québec	QC	2026-05-22	NULL
+STR-004	NexaMart Gatineau	Gatineau	Outaouais	QC	2026-05-22	NULL
+STR-005	NexaMart Sherbrooke	Sherbrooke	Estrie	QC	2026-05-22	NULL
+STR-006	NexaMart Ottawa	Ottawa	Ontario	ON	2026-05-22	NULL
+STR-007	NexaMart Toronto-Downtown	Toronto	Ontario	ON	2026-05-22	NULL
+STR-008	NexaMart Mississauga	Mississauga	Ontario	ON	2026-05-22	NULL
+STR-009	NexaMart Calgary	Calgary	Alberta	AB	2026-05-22	NULL
+STR-010	NexaMart Vancouver	Vancouver	BC	BC	2026-05-22	NULL
+vendredi 17 h 31
+ajouter dans cet script ADD COLUMN Is_Current VARCHAR;
+select * from dim_store
+vendredi 17 h 39
+A travaillé pendant 14s
+Résultat actuel de :
+SELECT *
+FROM dim_store;
+store_id	name	city	region	province	effective	end	Is_Current
+STR-001	NexaMart Centre-Ville	Montréal	Québec	QC	2026-05-22	NULL	NULL
+STR-002	NexaMart Rive-Sud	Longueuil	Québec	QC	2026-05-22	NULL	NULL
+STR-003	NexaMart Laval	Laval	Québec	QC	2026-05-22	NULL	NULL
+STR-004	NexaMart Gatineau	Gatineau	Outaouais	QC	2026-05-22	NULL	NULL
+STR-005	NexaMart Sherbrooke	Sherbrooke	Estrie	QC	2026-05-22	NULL	NULL
+STR-006	NexaMart Ottawa	Ottawa	Ontario	ON	2026-05-22	NULL	NULL
+STR-007	NexaMart Toronto-Downtown	Toronto	Ontario	ON	2026-05-22	NULL	NULL
+STR-008	NexaMart Mississauga	Mississauga	Ontario	ON	2026-05-22	NULL	NULL
+STR-009	NexaMart Calgary	Calgary	Alberta	AB	2026-05-22	NULL	NULL
+STR-010	NexaMart Vancouver	Vancouver	BC	BC	2026-05-22	NULL	NULL
+La colonne Is_Current existe maintenant, mais elle est vide (NULL) parce que le script ajoute seulement la colonne, sans encore faire de UPDATE pour mettre True.
+vendredi 17 h 39
+CREATE OR REPLACE TABLE dim_store AS SELECT store_id AS store_id, store_name AS name, city, region, province, current_date AS effective, NULL::DATE AS "end" FROM raw_dim_store; ALTER TABLE dim_store ADD COLUMN Is_Current VARCHAR; modifier le script paraIs_current = true
+vendredi 17 h 40
+A travaillé pendant 17s
+J’ai modifié dim_store.sql (line 1).
+Le script est maintenant :
+CREATE OR REPLACE TABLE dim_store AS
+SELECT store_id AS store_id,
+    store_name AS name,
+    city,
+    region,
+    province,
+    current_date AS effective,
+    NULL::DATE AS "end",
+    TRUE AS Is_Current
+FROM raw_dim_store;
+Maintenant Is_Current sera créé directement avec la valeur true pour toutes les lignes quand tu relances make load ou le script.
+vendredi 17 h 41
+select * from dim_store
+vendredi 17 h 41
+A travaillé pendant 13s
+Résultat actuel de :
+SELECT *
+FROM dim_store;
+store_id	name	city	region	province	effective	end	Is_Current
+STR-001	NexaMart Centre-Ville	Montréal	Québec	QC	2026-05-22	NULL	true
+STR-002	NexaMart Rive-Sud	Longueuil	Québec	QC	2026-05-22	NULL	true
+STR-003	NexaMart Laval	Laval	Québec	QC	2026-05-22	NULL	true
+STR-004	NexaMart Gatineau	Gatineau	Outaouais	QC	2026-05-22	NULL	true
+STR-005	NexaMart Sherbrooke	Sherbrooke	Estrie	QC	2026-05-22	NULL	true
+STR-006	NexaMart Ottawa	Ottawa	Ontario	ON	2026-05-22	NULL	true
+STR-007	NexaMart Toronto-Downtown	Toronto	Ontario	ON	2026-05-22	NULL	true
+STR-008	NexaMart Mississauga	Mississauga	Ontario	ON	true
+STR-009	NexaMart Calgary	Calgary	Alberta	AB	2026-05-22	NULL	true
+STR-010	NexaMart Vancouver	Vancouver	BC	BC	2026-05-22	NULL	true
+vendredi 17 h 41
+UPDATE dim_store SET region = 'Québec' WHERE store_id = 'STR-004'; executer
+vendredi 17 h 42
+A travaillé pendant 8s
+Exécuté.
+Vérification :
+store_id	name	city	region	province	effective	end	Is_Current
+STR-004	NexaMart Gatineau	Gatineau	Québec	QC	2026-05-22	NULL	true
+vendredi 17 h 42
+creer le script: cherche le store_id = STR-004 copiar toda a linha pour copier la linhe le nouveau ID doit être créé la règle chercher le champ store_id chercher le MAx du contenu de cet champ ajouter une unité dans le chiffer apres le caractere - la composition STR-nouveuxChiffre est le nouveau id créer une ligne avec le nouveau contenu de store_id exemple le max id de store_id = STR-10 la nouvelle ligne va contenir store_id name city region province effective end Is_Current STR-011 NexaMart Gatineau Gatineau Québec QC date today null true pourquaoi STR-011, parce que STR-010 +1 = STR011 le prochaine sera STR-011 juste créer le script ici.
+Afficher plus
+vendredi 17 h 58
+A travaillé pendant 1m 30s
+J’ai créé le script dans type1_vs_type2_demo.sql (line 1).
+Il fait ceci :
+INSERT INTO dim_store (store_id, name, city, region, province, effective, "end", Is_Current)
+SELECT
+    'STR-' || lpad(
+        CAST((
+            SELECT MAX(CAST(split_part(store_id, '-', 2) AS INTEGER)) + 1
+            FROM dim_store
+        ) AS VARCHAR),
+        3,
+        '0'
+    ) AS store_id,
+    name,
+    city,
+    'Québec' AS region,
+    province,
+    current_date AS effective,
+    NULL::DATE AS "end",
+    TRUE AS Is_Current
+FROM dim_store
+WHERE store_id = 'STR-004';
+Avec STR-010 comme max actuel, la nouvelle ligne créée sera STR-011.
+vendredi 18 h 00
+select * from dim_store
+vendredi 18 h 00
+A travaillé pendant 15s
+Résultat actuel de :
+SELECT *
+FROM dim_store;
+store_id	name	city	region	province	effective	end	Is_Current
+STR-001	NexaMart Centre-Ville	Montréal	Québec	QC	2026-05-22	NULL	true
+STR-002	NexaMart Rive-Sud	Longueuil	Québec	QC	2026-05-22	NULL	true
+STR-003	NexaMart Laval	Laval	Québec	QC	2026-05-22	NULL	true
+STR-004	NexaMart Gatineau	Gatineau	Québec	QC	2026-05-22	NULL	true
+STR-005	NexaMart Sherbrooke	Sherbrooke	Estrie	QC	2026-05-22	NULL	true
+STR-006	NexaMart Ottawa	Ottawa	Ontario	ON	2026-05-22	NULL	true
+STR-007	NexaMart Toronto-Downtown	Toronto	Ontario	ON	true
+STR-008	NexaMart Mississauga	Mississauga	Ontario	ON	2026-05-22	NULL	true
+STR-009	NexaMart Calgary	Calgary	Alberta	AB	2026-05-22	NULL	true
+STR-010	NexaMart Vancouver	Vancouver	BC	BC	2026-05-22	NULL	true
+Il n’y a pas encore de STR-011, parce que le script type1_vs_type2_demo.sql a été créé/modifié, mais pas exécuté à ce moment-là.
+vendredi 18 h 00
+executer: INSERT INTO dim_store (store_id, name, city, region, province, effective, "end", Is_Current) SELECT 'STR-' || lpad( CAST(( SELECT MAX(CAST(split_part(store_id, '-', 2) AS INTEGER)) + 1 FROM dim_store ) AS VARCHAR), 3, '0' ) AS store_id, name, city, 'Québec' AS region, province, current_date AS effective, NULL::DATE AS "end", TRUE AS Is_Current FROM dim_store WHERE store_id = 'STR-004';
+Afficher plus
+vendredi 18 h 01
+A travaillé pendant 13s
+Exécuté avec succès.
+La nouvelle ligne créée est STR-011 :
+store_id	name	city	region	province	effective	end	Is_Current
+STR-004	NexaMart Gatineau	Gatineau	Québec	QC	2026-05-22	NULL	true
+STR-011	NexaMart Gatineau	Gatineau	Québec	QC	2026-05-22	NULL	true
+vendredi 18 h 01
+ajouter dans le script les règles: dans la ligne du where, store_id = 'STR-004' replace le contenu par dateToday replace le champ is_current = false give all script with this changes
+
+
+
+executer: UPDATE dim_store SET "end" = current_date, Is_Current = FALSE WHERE store_id = 'STR-004'; INSERT INTO dim_store (store_id, name, city, region, province, effective, "end", Is_Current) SELECT 'STR-' || lpad( CAST(( SELECT MAX(CAST(split_part(store_id, '-', 2) AS INTEGER)) + 1 FROM dim_store ) AS VARCHAR), 3, '0' ) AS store_id, name, city, 'Québec' AS region, province, current_date AS effective, NULL::DATE AS "end", TRUE AS Is_Current FROM dim_store WHERE store_id = 'STR-004';
+Afficher plus
+vendredi 18 h 35
+A travaillé pendant 15s
+Exécuté avec succès.
+Résultat pour NexaMart Gatineau :
+store_id	name	city	region	province	effective	end	Is_Current
+STR-004	NexaMart Gatineau	Gatineau	Québec	QC	2026-03-01	2026-05-22	false
+STR-011	NexaMart Gatineau	Gatineau	Québec	QC	2026-05-22	NULL	true
+vendredi 18 h 35
+UPDATE dim_store SET "end" = current_date, Is_Current = FALSE WHERE store_id = 'STR-004'; INSERT INTO dim_store (store_id, name, city, region, province, effective, "end", Is_Current) SELECT 'STR-' || lpad( CAST(( SELECT MAX(CAST(split_part(store_id, '-', 2) AS INTEGER)) + 1 FROM dim_store ) AS VARCHAR), 3, '0' ) AS store_id, name, city, 'Québec' AS region, province, current_date AS effective, NULL::DATE AS "end", TRUE AS Is_Current FROM dim_store WHERE store_id = 'STR-004';
+Afficher plus
+vendredi 18 h 36
+A travaillé pendant 14s
+Exécuté.
+Résultat pour NexaMart Gatineau :
+store_id	name	city	region	province	effective	end	Is_Current
+STR-004	NexaMart Gatineau	Gatineau	Québec	QC	2026-03-01	2026-05-22	false
+STR-011	NexaMart Gatineau	Gatineau	Québec	QC	2026-05-22	NULL	true
+STR-012	NexaMart Gatineau	Gatineau	Québec	QC	2026-05-22	NULL	true
+Comme le script avait déjà été exécuté une fois, cette nouvelle exécution a créé une autre ligne : STR-012.
+vendredi 18 h 36
+select * from dim_store
+vendredi 18 h 37
+A travaillé pendant 14s
+Résultat actuel de :
+SELECT *
+FROM dim_store;
+store_id	name	city	region	province	effective	end	Is_Current
+STR-001	NexaMart Centre-Ville	Montréal	Québec	QC	2026-03-01	NULL	true
+STR-002	NexaMart Rive-Sud	Longueuil	Québec	QC	2026-03-01	NULL	true
+STR-003	NexaMart Laval	Laval	Québec	QC	2026-03-01	NULL	true
+STR-004	NexaMart Gatineau	Gatineau	Outaouais	QC	2026-03-01	NULL	true
+STR-005	NexaMart Sherbrooke	Sherbrooke	Estrie	QC	2026-03-01	NULL	true
+STR-006	NexaMart Ottawa	Ottawa	Ontario	ON	2026-03-01	NULL	true
+STR-007	NexaMart Toronto-Downtown	Toronto	Ontario	ON	2026-03-01	NULL	true
+STR-008	NexaMart Mississauga	Mississauga	Ontario	ON	2026-03-01	NULL	true
+STR-009	NexaMart Calgary	Calgary	Alberta	AB	2026-03-01	NULL	true
+STR-010	NexaMart Vancouver	Vancouver	BC	BC	2026-03-01	NULL	true
+La table est revenue à 10 lignes, probablement parce que make load ou le script dim_store.sql a reconstruit dim_store depuis raw_dim_store.
+vendredi 18 h 38
+UPDATE dim_store SET "end" = current_date, Is_Current = FALSE WHERE store_id = 'STR-004'; INSERT INTO dim_store (store_id, name, city, region, province, effective, "end", Is_Current) SELECT 'STR-' || lpad( CAST(( SELECT MAX(CAST(split_part(store_id, '-', 2) AS INTEGER)) + 1 FROM dim_store ) AS VARCHAR), 3, '0' ) AS store_id, name, city, 'Québec' AS region, province, current_date AS effective, NULL::DATE AS "end", TRUE AS Is_Current FROM dim_store WHERE store_id = 'STR-004';
+Afficher plus
+vendredi 18 h 38
+A travaillé pendant 14s
+Exécuté.
+Résultat pour NexaMart Gatineau :
+
+store_id	name	city	region	province	effective	end	Is_Current
+STR-004	NexaMart Gatineau	Gatineau	Outaouais	QC	2026-03-01	2026-05-22	false
+STR-011	NexaMart Gatineau	Gatineau	Québec	QC	2026-05-22	NULL	true
+
+
+select * from dim_store where name = 'NexaMart Gatineau' and is_current = 'true'
+vendredi 18 h 42
+A travaillé pendant 10s
+Résultat de :
+SELECT *
+FROM dim_store
+WHERE name = 'NexaMart Gatineau'
+  AND is_current = true;
+store_id	name	city	region	province	effective	end	Is_Current
+STR-011	NexaMart Gatineau	Gatineau	Québec	QC	2026-05-22	NULL	true
+
+SELECT name,city,region,province FROM dim_store WHERE name = 'NexaMart Gatineau' AND is_current = true;
+vendredi 18 h 43
+A travaillé pendant 8s
+Résultat de :
+SELECT name, city, region, province
+FROM dim_store
+WHERE name = 'NexaMart Gatineau'
+  AND is_current = true;
+name	city	region	province
+NexaMart Gatineau	Gatineau	Québec	QC
+
+Résultat actuel de :
+SELECT *
+FROM dim_store;
+store_id	name	city	region	province	effectiveDate	endDate	Is_Current
+STR-001	NexaMart Centre-Ville	Montréal	Québec	QC	2026-03-01	NULL	true
+STR-002	NexaMart Rive-Sud	Longueuil	Québec	QC	2026-03-01	NULL	true
+STR-003	NexaMart Laval	Laval	Québec	QC	2026-03-01	NULL	true
+STR-004	NexaMart Gatineau	Gatineau	Outaouais	QC	2026-03-01	2026-05-23	false
+STR-005	NexaMart Sherbrooke	Sherbrooke	Estrie	QC	2026-03-01	NULL	true
+STR-006	NexaMart Ottawa	Ottawa	Ontario	ON	2026-03-01	NULL	true
+STR-007	NexaMart Toronto-Downtown	Toronto	Ontario	ON	2026-03-01	NULL	true
+STR-008	NexaMart Mississauga	Mississauga	Ontario	ON	2026-03-01	NULL	true
+STR-009	NexaMart Calgary	Calgary	Alberta	AB	2026-03-01	NULL	true
+STR-010	NexaMart Vancouver	Vancouver	BC	BC	2026-03-01	NULL	true
+STR-011	NexaMart Gatineau	Gatineau	Québec	QC	2026-05-23	NULL	true
+
+select * from dim_store
+samedi 23 h 51
+
+
+A travaillé pendant 6s
+Résultat actuel de :
+
+SELECT * FROM dim_store;
+store_key store_id  name                         city         region     province effective   end  is_current
+001       STR-001   NexaMart Centre-Ville        Montréal     Québec     QC       2025-01-01  NaT  True
+002       STR-002   NexaMart Rive-Sud            Longueuil    Québec     QC       2025-01-01  NaT  True
+003       STR-003   NexaMart Laval               Laval        Québec     QC       2025-01-01  NaT  True
+004       STR-004   NexaMart Gatineau            Gatineau     Outaouais  QC       2025-01-01  NaT  True
+005       STR-005   NexaMart Sherbrooke          Sherbrooke   Estrie     QC       2025-01-01  NaT  True
+006       STR-006   NexaMart Ottawa              Ottawa       Ontario    ON       2025-01-01  NaT  True
+007       STR-007   NexaMart Toronto-Downtown    Toronto      Ontario    ON       2025-01-01  NaT  True
+008       STR-008   NexaMart Mississauga         Mississauga  Ontario    ON       2025-01-01  NaT  True
+009       STR-009   NexaMart Calgary             Calgary      Alberta    AB       2025-01-01  NaT  True
+010       STR-010   NexaMart Vancouver           Vancouver    BC         BC       2025-01-01  NaT  True
+Note : la table est revenue à 10 lignes. La version SCD2 avec store_key = 011 n’est plus présente, probablement parce que make load ou le script dim_store.sql a recréé dim_store depuis raw_dim_store.
+
+
+
+
+
+samedi 23 h 51
+UPDATE dim_store
+SET region = 'Québec'
+WHERE store_id = 'STR-004';
+samedi 23 h 52
+
+
+A travaillé pendant 10s
+UPDATE exécuté avec succès.
+
+Vérification pour STR-004 :
+
+store_key store_id  name               city      region  province effective   end  is_current
+004       STR-004   NexaMart Gatineau  Gatineau  Québec  QC       2025-01-01  NaT  True
+C’est un changement Type 1 : la valeur historique Outaouais a été remplacée par Québec.
+
+
+
+
+
+samedi 23 h 52
+SELECT
+    f.order_number,
+    f.sale_line_id,
+    f.date_key,
+    f.store_key,
+    d.store_id,
+    d.name,
+    d.region,
+    d.effective,
+    d."end",
+    f.line_total
+FROM fact_sales f
+JOIN dim_store d
+  ON f.store_key = d.store_key
+ AND f.date_key >= d.effective
+ AND (d."end" IS NULL OR f.date_key <= d."end")
+WHERE f.date_key >= DATE '2025-01-01'
+  AND f.date_key < DATE '2025-02-01'
+  AND d.name = 'NexaMart Gatineau'
+ORDER BY f.date_key, f.order_number, f.sale_line_id;
+samedi 23 h 54
+
+
+A travaillé pendant 10s
+Requête exécutée avec succès.
+
+Elle retourne 27 lignes. Après ton UPDATE Type 1, toutes les ventes de janvier 2025 pour NexaMart Gatineau affichent maintenant la région Québec :
+
+order_number  sale_line_id  date_key    store_key  store_id  name               region  effective   end  line_total
+ORD-000324    1032          2025-01-09  004        STR-004   NexaMart Gatineau  Québec  2025-01-01  NaT  147.57
+ORD-000324    1033          2025-01-09  004        STR-004   NexaMart Gatineau  Québec  2025-01-01  NaT  64.38
+ORD-000324    1034          2025-01-09  004        STR-004   NexaMart Gatineau  Québec  2025-01-01  NaT  84.64
+...
+ORD-000425    1359          2025-01-30  004        STR-004   NexaMart Gatineau  Québec  2025-01-01  NaT  26.92
+C’est exactement le comportement d’un SCD Type 1 : l’historique est écrasé. Les ventes passées montrent maintenant la nouvelle région.
+
+
+
+
+
+samedi 23 h 54
+montrer les champs de dim_store
+0 h 00
+
+
+A travaillé pendant 5s
+Les champs de dim_store sont :
+
+store_key    VARCHAR
+store_id     VARCHAR
+name         VARCHAR
+city         VARCHAR
+region       VARCHAR
+province     VARCHAR
+effective    DATE
+end          DATE
+is_current   BOOLEAN
+
+
+
+
+0 h 01
+BEGIN TRANSACTION;
+CREATE TEMP TABLE store_to_change AS
+SELECT *
+FROM dim_store
+WHERE store_id = 'STR-004'
+    AND is_current = TRUE;
+UPDATE dim_store
+SET "end" = DATE '2026-02-28',
+    is_current = FALSE
+WHERE store_id = 'STR-004'
+    AND is_current = TRUE;
+INSERT INTO dim_store (
+        store_key,
+        store_id,
+        name,
+        city,
+        region,
+        province,
+        effective,
+        "end",
+        is_current
+    )
+SELECT lpad(
+        CAST(
+            (
+                SELECT MAX(CAST(store_key AS INTEGER)) + 1
+                FROM dim_store
+            ) AS VARCHAR
+        ),
+        3,
+        '0'
+    ) AS store_key,
+    store_id,
+    name,
+    city,
+    'Québec' AS region,
+    province,
+    DATE '2026-03-01' AS effective,
+    NULL::DATE AS "end",
+    TRUE AS is_current
+FROM store_to_change;
+DROP TABLE store_to_change;
+COMMIT;
+
+Afficher plus
+0 h 21
+
+
+A travaillé pendant 11s
+Transaction exécutée avec succès.
+
+Résultat pour STR-004 :
+
+store_key store_id  name               city      region     province effective   end         is_current
+004       STR-004   NexaMart Gatineau  Gatineau  Outaouais  QC       2025-01-01  2026-02-28  False
+011       STR-004   NexaMart Gatineau  Gatineau  Québec     QC       2026-03-01  NaT         True
+Donc la version Type 2 est bien en place : ancienne région Outaouais fermée au 2026-02-28, nouvelle région Québec active à partir du 2026-03-01.
+
+
+
+
+
+0 h 21
+SELECT
+    f.order_number,
+    f.sale_line_id,
+    f.date_key,
+    f.store_key,
+    d.store_id,
+    d.name,
+    d.region,
+    d.effective,
+    d."end",
+    f.line_total
+FROM fact_sales f
+JOIN dim_store d
+  ON f.store_key = d.store_key
+ AND f.date_key >= d.effective
+ AND (d."end" IS NULL OR f.date_key <= d."end")
+WHERE f.date_key >= DATE '2025-01-01'
+  AND f.date_key < DATE '2025-02-01'
+  AND d.name = 'NexaMart Gatineau'
+ORDER BY f.date_key, f.order_number, f.sale_line_id;
+0 h 21
+
+
+A travaillé pendant 14s
+Requête exécutée avec succès.
+
+Elle retourne 27 lignes. Après le SCD Type 2, les ventes de janvier 2025 de NexaMart Gatineau restent associées à la région historique Outaouais :
+
+order_number  sale_line_id  date_key    store_key  store_id  name               region     effective   end         line_total
+ORD-000324    1032          2025-01-09  004        STR-004   NexaMart Gatineau  Outaouais  2025-01-01  2026-02-28  147.57
+ORD-000324    1033          2025-01-09  004        STR-004   NexaMart Gatineau  Outaouais  2025-01-01  2026-02-28  64.38
+ORD-000324    1034          2025-01-09  004        STR-004   NexaMart Gatineau  Outaouais  2025-01-01  2026-02-28  84.64
+...
+ORD-000425    1359          2025-01-30  004        STR-004   NexaMart Gatineau  Outaouais  2025-01-01  2026-02-28  26.92
+Donc la démonstration est bonne : en Type 2, l’historique est conservé.
+
+
+
+
+
+0 h 22
+tenho o erro no make check
+[FAIL]  PK_UNIQUE        dim_store.store_id                             FAIL — duplicate store_id
+
+se eu inverter o nome do campo store_id para store_key o make check vai passar?
+0 h 25
+
+
+Não. Inverter o nome de store_id para store_key não é a boa solução.
+
+O make check falha porque ele verifica isto em validation/checks.sql:
+
+SELECT 'PK_UNIQUE' AS check_type,
+       'dim_store.store_id' AS detail,
+       CASE WHEN COUNT(*) = COUNT(DISTINCT store_id) THEN 'PASS'
+            ELSE 'FAIL — duplicate store_id' END AS result
+FROM dim_store;
+Depois do SCD Type 2, store_id = 'STR-004' aparece duas vezes :
+
+store_key  store_id
+004        STR-004
+011        STR-004
+Isso é normal em Type 2 : store_id est la clé naturelle, elle peut se répéter. La vraie clé unique devient store_key.
+
+Donc oui, si le check vérifiait store_key, il passerait probablement. Mais il ne faut pas renommer les colonnes dans dim_store; il faut plutôt modifier le check pour valider store_key :
+
+SELECT 'PK_UNIQUE' AS check_type,
+       'dim_store.store_key' AS detail,
+       CASE WHEN COUNT(*) = COUNT(DISTINCT store_key) THEN 'PASS'
+            ELSE 'FAIL — duplicate store_key' END AS result
+FROM dim_store;
+Conclusion : garde store_id et store_key. Pour un SCD Type 2, store_key doit être unique, pas store_id.

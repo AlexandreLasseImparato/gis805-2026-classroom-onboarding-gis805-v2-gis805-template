@@ -3,7 +3,7 @@ SELECT
     order_number AS order_key,
     product_id AS product_key,
     customer_id AS customer_key,
-    store_id AS store_key,
+    split_part(store_id, '-', 2) AS store_key,
     channel_id AS channel_key,
     order_date AS date_key,
     order_number,

@@ -38,7 +38,7 @@ SELECT
     COUNT(*) AS nb_lignes
 FROM fact_sales f
 JOIN dim_product p ON f.product_key = p.product_id
-JOIN dim_store   s ON f.store_key   = s.store_id
+JOIN dim_store   s ON f.store_key   = s.store_key
 JOIN dim_date    d ON f.date_key    = d.date_key
 GROUP BY p.category, s.region, d.quarter
 ORDER BY total_revenue DESC
@@ -76,7 +76,7 @@ SELECT
     ) AS variation_pct
 FROM fact_sales f
 JOIN dim_product p ON f.product_key = p.product_id
-JOIN dim_store s ON f.store_key = s.store_id
+JOIN dim_store s ON f.store_key = s.store_key
 JOIN dim_date d ON f.date_key = d.date_key
 JOIN dim_channel c ON f.channel_key = c.channel_id
 WHERE p.category = 'Pet Supplies'

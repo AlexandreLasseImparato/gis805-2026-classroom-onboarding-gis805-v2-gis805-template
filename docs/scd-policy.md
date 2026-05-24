@@ -181,3 +181,16 @@ ORD-000324    1033          2025-01-09  004        STR-004   NexaMart Gatineau  
 ORD-000324    1034          2025-01-09  004        STR-004   NexaMart Gatineau  Outaouais  2025-01-01  2026-02-28  84.64
 
 Conclusion : pour janvier 2025, NexaMart Gatineau est bien rattaché à la région historique Outaouais, car la nouvelle version Québec commence seulement le 2026-03-01.
+
+Si je fais une requête pour montrer le status actuel de mon magasin STR-004, NexaMart Gatineau le resultat c'est la nouvelle region corrigé.
+
+select
+  current_date as date_aujourdhui,
+  name as nom_magasin,
+  region
+from dim_store
+where store_id = 'STR-004'
+  and is_current = true;
+  >
+date_aujourdhui	    nom_magasin	        region
+2026-05-24	        NexaMart Gatineau	Québec

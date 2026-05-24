@@ -1522,15 +1522,7 @@ In-Store        physical      3917.70     2822.15     -1095.55   -27.96
 Le plus gros déclin est E-Commerce Web, avec une baisse d’environ 81,6 %.
 
 
-- Limites ou erreurs observées.
 
-Quand les requêtes sont très complexes, avec beaucoup de jointures, plusieurs tables et des tables ponts, les résultats peuvent être affectés. Ainsi, une même requête peut produire des résultats différents selon la personne qui la construit.
-
-Si on modifie légèrement la manière d’écrire le script, même pour obtenir un résultat similaire, l’IA peut interpréter la demande différemment et fournir un résultat différent. Donc, deux personnes ayant le même objectif analytique peuvent obtenir des résultats différents simplement parce que la formulation de la requête ou du besoin a changé, ce qui peut mener à une logique SQL différente.
-
-De plus, lorsqu’on travaille avec des requêtes complexes, la validation devient souvent nécessaire afin de comprendre comment le résultat a été obtenu. Cette validation peut devenir très exhaustive lorsqu’il y a de nombreux éléments impliqués. Dans mon cas, j’ai seulement effectué quelques validations liées au nombre de lignes, aux jointures ou aux totaux, mais dans un contexte réel, cette validation peut demander beaucoup plus de temps.
-
-Même lors de la lecture directe d’une table importée à partir d’un CSV, pourtant petite, il est arrivé qu’en demandant une valeur précise (ligne/colonne), la réponse soit erronée. Après vérification, l’IA a répondu : « Vous avez raison, voici la nouvelle valeur ». La fiabilité peut donc être variable et nécessite des tests avant toute utilisation pour une prise de décision réelle.
 
 
 SELECT *
@@ -2144,3 +2136,13 @@ SELECT 'PK_UNIQUE' AS check_type,
             ELSE 'FAIL — duplicate store_key' END AS result
 FROM dim_store;
 Conclusion : garde store_id et store_key. Pour un SCD Type 2, store_key doit être unique, pas store_id.
+
+- Limites ou erreurs observées.
+
+Quand les requêtes sont très complexes, avec beaucoup de jointures, plusieurs tables et des tables ponts, les résultats peuvent être affectés. Ainsi, une même requête peut produire des résultats différents selon la personne qui la construit.
+
+Si on modifie légèrement la manière d’écrire le script, même pour obtenir un résultat similaire, l’IA peut interpréter la demande différemment et fournir un résultat différent. Donc, deux personnes ayant le même objectif analytique peuvent obtenir des résultats différents simplement parce que la formulation de la requête ou du besoin a changé, ce qui peut mener à une logique SQL différente.
+
+De plus, lorsqu’on travaille avec des requêtes complexes, la validation devient souvent nécessaire afin de comprendre comment le résultat a été obtenu. Cette validation peut devenir très exhaustive lorsqu’il y a de nombreux éléments impliqués. Dans mon cas, j’ai seulement effectué quelques validations liées au nombre de lignes, aux jointures ou aux totaux, mais dans un contexte réel, cette validation peut demander beaucoup plus de temps.
+
+Même lors de la lecture directe d’une table importée à partir d’un CSV, pourtant petite, il est arrivé qu’en demandant une valeur précise (ligne/colonne), la réponse soit erronée. Après vérification, l’IA a répondu : « Vous avez raison, voici la nouvelle valeur ». La fiabilité peut donc être variable et nécessite des tests avant toute utilisation pour une prise de décision réelle.
